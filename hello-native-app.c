@@ -33,8 +33,6 @@ BOOL DoWriteFile(LPCWSTR pszFileName, LPCVOID pvData, ULONG_PTR cbData)
     SIZE_T ViewSize = 0;
     BOOL ret = FALSE;
 
-    InitializeObjectAttributes(&ObjectAttributes, &FileName, 0, NULL, NULL);
-
     RtlInitUnicodeString(&FileName, pszFileName);
 
     InitializeObjectAttributes(&ObjectAttributes,
