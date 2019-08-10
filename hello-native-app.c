@@ -70,6 +70,11 @@ BOOL DoWriteFile(LPCWSTR pszFileName, LPCVOID pvData, ULONG_PTR cbData)
     return ret;
 }
 
+#define WIDTH 320
+#define HEIGHT 200
+#define DEPTH 24
+#define IMAGE_SIZE (WIDTHBYTES(WIDTH * DEPTH) * HEIGHT)
+
 INT
 __cdecl
 _main(
@@ -78,7 +83,7 @@ _main(
     IN PCHAR envp[],
     IN ULONG DebugFlag)
 {
-    BYTE ab[sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER) + WIDTHBYTES(320 * 24) * 200];
+    BYTE ab[sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER) + IMAGE_SIZE];
     LPBYTE pb = ab;
     BITMAPFILEHEADER *pbf;
     BITMAPINFOHEADER *pbi;
@@ -87,7 +92,7 @@ _main(
     pb += sizeof(*pbf);
     pbi = (BITMAPINFOHEADER *)pb;
     pb += sizeof(*pbi);
-    RtlFillMemory(pb, WIDTHBYTES(320 * 24) * 200, 0x88);
+    RtlFillMemory(pb, IMAGE_SIZE, 0x88);
 
     pbf->bfType = 0x4D42;
     pbf->bfSize = sizeof(ab);
@@ -96,11 +101,11 @@ _main(
     pbf->bfOffBits = sizeof(*pbf) + sizeof(*pbi);
 
     RtlZeroMemory(pbi, sizeof(*pbi));
-    pbi->biSize = sizeof(BITMAPINFOHEADER);
-    pbi->biWidth = 320;
-    pbi->biHeight = 200;
+    pbi->biSize = sizeof(*pbi);
+    pbi->biWidth = WIDTH;
+    pbi->biHeight = HEIGHT;
     pbi->biPlanes = 1;
-    pbi->biBitCount = 24;
+    pbi->biBitCount = DEPTH;
 
     if (DoWriteFile(L"\\SystemRoot\\a.bmp", ab, sizeof(ab)))
     {
