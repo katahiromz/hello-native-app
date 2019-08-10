@@ -14,6 +14,7 @@
 #include <ndk/rtlfuncs.h>
 #include <ndk/mmfuncs.h>
 #include <ndk/obfuncs.h>
+#include <ndk/psfuncs.h>
 
 #define NDEBUG
 #include <debug.h>
@@ -21,7 +22,7 @@
 BOOL CreateNativeProcess(LPCWSTR file_name, LPCWSTR cmd_line)
 {
     NTSTATUS status;
-    LPWSTR file_part;
+    LPCWSTR file_part;
     UNICODE_STRING nt_file, imgname, imgpath, dllpath, cmdline;
     PRTL_USER_PROCESS_PARAMETERS processparameters;
     RTL_USER_PROCESS_INFORMATION processinformation = {0};
@@ -59,7 +60,7 @@ BOOL CreateNativeProcess(LPCWSTR file_name, LPCWSTR cmd_line)
     return TRUE;
 }
 
-int main(int argc, char *argv)
+int main(int argc, char **argv)
 {
     return CreateNativeProcess(L"hello-native-app.exe", L"hello-native-app.exe") ? 0 : -1;
 }
