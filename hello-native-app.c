@@ -132,7 +132,7 @@ _main(
     data.bi.biPlanes = 1;
     data.bi.biBitCount = 24;
 
-    RtlFillMemory(&data.ab, sizeof(data.ab), 0xFF);
+    RtlFillMemory(&data.ab, sizeof(data.ab), 0x88);
 
     if (DoWriteFile(L"\\SystemRoot\\a.bmp", &data, sizeof(data)))
     {
