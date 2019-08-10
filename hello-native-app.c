@@ -27,10 +27,6 @@ BOOL DoWriteFile(LPCWSTR pszFileName, LPCVOID pvData, ULONG_PTR cbData)
     OBJECT_ATTRIBUTES ObjectAttributes;
     IO_STATUS_BLOCK IoStatusBlock;
     HANDLE hFile = INVALID_HANDLE_VALUE;
-    HANDLE hSection;
-    LARGE_INTEGER FileSize, Offset;
-    PVOID BaseAddress;
-    SIZE_T ViewSize = 0;
     BOOL ret = FALSE;
 
     RtlInitUnicodeString(&FileName, pszFileName);
@@ -47,7 +43,7 @@ BOOL DoWriteFile(LPCWSTR pszFileName, LPCVOID pvData, ULONG_PTR cbData)
                           NULL,
                           FILE_ATTRIBUTE_NORMAL,
                           0,
-                          FILE_CREATE,
+                          FILE_OVERWRITE_IF,
                           FILE_SYNCHRONOUS_IO_NONALERT,
                           NULL, 0);
     if (!NT_SUCCESS(Status))
@@ -55,58 +51,24 @@ BOOL DoWriteFile(LPCWSTR pszFileName, LPCVOID pvData, ULONG_PTR cbData)
         return FALSE;
     }
 
-    FileSize.QuadPart = cbData;
-    Status = NtCreateSection(&hSection,
-                             SECTION_ALL_ACCESS,
-                             NULL,
-                             &FileSize,
-                             PAGE_READWRITE,
-                             SEC_COMMIT,
-                             hFile);
-    if (!NT_SUCCESS(Status))
+    Status = NtWriteFile(hFile,
+                         NULL,
+                         NULL,
+                         NULL,
+                         &IoStatusBlock,
+                         (PVOID)pvData,
+                         cbData,
+                         NULL,
+                         NULL);
+    if (NT_SUCCESS(Status))
     {
-        goto CloseFile;
+        ret = TRUE;
     }
 
-    BaseAddress = NULL;
-    ViewSize = cbData;
-    Offset.QuadPart = 0;
-    Status = NtMapViewOfSection(hSection,
-                                NtCurrentProcess(),
-                                &BaseAddress,
-                                0,
-                                ViewSize,
-                                &Offset,
-                                &ViewSize,
-                                ViewUnmap,
-                                0,
-                                PAGE_READWRITE);
-    if (!NT_SUCCESS(Status) || ViewSize != cbData || !BaseAddress)
-    {
-        goto CloseSection;
-    }
-
-    RtlCopyMemory(BaseAddress, pvData, cbData);
-
-    ret = TRUE;
-
-    NtUnmapViewOfSection(NtCurrentProcess(), BaseAddress);
-
-CloseSection:
-    NtClose(hSection);
-
-CloseFile:
     NtClose(hFile);
 
     return ret;
 }
-
-typedef struct MYBITMAPDATA
-{
-    BITMAPFILEHEADER bf;
-    BITMAPINFOHEADER bi;
-    BYTE ab[WIDTHBYTES(320 * 24) * 200];
-} MYBITMAPDATA;
 
 INT
 __cdecl
@@ -116,23 +78,31 @@ _main(
     IN PCHAR envp[],
     IN ULONG DebugFlag)
 {
-    MYBITMAPDATA data;
-    data.bf.bfType = 0x4D42;
-    data.bf.bfSize = sizeof(data);
-    data.bf.bfReserved1 = 0;
-    data.bf.bfReserved2 = 0;
-    data.bf.bfOffBits = sizeof(data);
+    BYTE ab[sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER) + WIDTHBYTES(320 * 24) * 200];
+    LPBYTE pb = ab;
+    BITMAPFILEHEADER *pbf;
+    BITMAPINFOHEADER *pbi;
 
-    RtlZeroMemory(&data.bi, sizeof(data.bi));
-    data.bi.biSize = sizeof(BITMAPINFOHEADER);
-    data.bi.biWidth = 320;
-    data.bi.biHeight = 200;
-    data.bi.biPlanes = 1;
-    data.bi.biBitCount = 24;
+    pbf = (BITMAPFILEHEADER *)pb;
+    pb += sizeof(*pbf);
+    pbi = (BITMAPINFOHEADER *)pb;
+    pb += sizeof(*pbi);
+    RtlFillMemory(pb, WIDTHBYTES(320 * 24) * 200, 0x88);
 
-    RtlFillMemory(&data.ab, sizeof(data.ab), 0x88);
+    pbf->bfType = 0x4D42;
+    pbf->bfSize = sizeof(ab);
+    pbf->bfReserved1 = 0;
+    pbf->bfReserved2 = 0;
+    pbf->bfOffBits = sizeof(*pbf) + sizeof(*pbi);
 
-    if (DoWriteFile(L"\\SystemRoot\\a.bmp", &data, sizeof(data)))
+    RtlZeroMemory(pbi, sizeof(*pbi));
+    pbi->biSize = sizeof(BITMAPINFOHEADER);
+    pbi->biWidth = 320;
+    pbi->biHeight = 200;
+    pbi->biPlanes = 1;
+    pbi->biBitCount = 24;
+
+    if (DoWriteFile(L"\\SystemRoot\\a.bmp", ab, sizeof(ab)))
     {
         return 0;
     }
