@@ -1,0 +1,5 @@
+add_executable(hello-native-app WIN32 hello-native-app.c)
+set_module_type(hello-native-app nativecui)
+target_link_libraries(hello-native-app nt)
+add_importlibs(hello-native-app ntdll)
+add_cd_file(TARGET hello-native-app DESTINATION reactos/system32 FOR all)
