@@ -1,8 +1,6 @@
-// starter,c
+// native-starter.c
 // Copyright (C) 2019 Katayama Hirofumi MZ <katayama.hirofumi.mz@gmail.com>.
 // This file is public domain software.
-//
-// NOTE: Copy this folder to $(REACTOS)\base\system and modify CMakeLists.txt.
 
 #define WIN32_NO_STATUS
 #include <windef.h>
@@ -62,5 +60,10 @@ BOOL CreateNativeProcess(LPCWSTR file_name, LPCWSTR cmd_line)
 
 int main(int argc, char **argv)
 {
-    return CreateNativeProcess(L"hello-native-app.exe", L"hello-native-app.exe") ? 0 : -1;
+    ANSI_STRING FileNameA;
+    UNICODE_STRING FileNameW;
+    RtlInitAnsiStringEx(&FileNameA, argv[1]);
+    RtlAnsiStringToUnicodeString(&FileNameW, &FileNameA, TRUE);
+
+    return CreateNativeProcess(FileNameW.Buffer, FileNameW.Buffer) ? 0 : -1;
 }
