@@ -107,7 +107,7 @@ _main(
     pbi->biPlanes = 1;
     pbi->biBitCount = DEPTH;
 
-    if (DoWriteFile(L"\\SystemRoot\\a.bmp", ab, sizeof(ab)))
+    if (DoWriteFile(L"\\SystemRoot\\gray.bmp", ab, sizeof(ab)))
     {
         return 0;
     }
