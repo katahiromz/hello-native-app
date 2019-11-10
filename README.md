@@ -14,5 +14,5 @@ add_subdirectory(hello-native-app)  # add this line
 
 3. Build the modified ReactOS.
 4. You will get the program files in output folder.
-5. Execute `"native-starter.exe hello-native-app.exe"` in Command Prompt of Windows 2003 or ReactOS.
+5. Execute `"native-starter.exe hello-native-app.exe"` on Command Prompt of Windows 2003 or ReactOS.
 6. You'll get a bitmap file `a.bmp` in `C:\Windows` or `C:\ReactOS`.
