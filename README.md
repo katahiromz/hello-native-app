@@ -1,4 +1,8 @@
+# hello-native-app
+
 This is a Windows NT native application.
+
+## How to use
 
 1. Copy this folder to `$(REACTOS)/base/setup`.
 2. Modify `$(REACTOS)/base/setup/CMakeLists.txt` as follows:
@@ -16,3 +20,8 @@ add_subdirectory(hello-native-app)  # add this line
 4. You will get the program files in output folder.
 5. Execute "`native-starter.exe hello-native-app.exe`" on Command Prompt of Windows 2003 or ReactOS.
 6. You'll get a bitmap file `gray.bmp` in `C:\Windows` or `C:\ReactOS`.
+
+## Reference
+
+- Wikipedia: https://en.wikipedia.org/wiki/Native_API
+- The Undocumented Functions: https://undocumented.ntinternals.net/
