@@ -134,9 +134,9 @@ _main(
     {
         SIZE_T i, Size;
 
-        for (i = 0x20; i < 0x7F; ++i)
+        for (i = 0; i < 256; ++i)
         {
-            pbData[i - 0x20] = (BYTE)i;
+            pbData[i] = (BYTE)i;
         }
 
         Size = RtlSizeHeap(RtlGetProcessHeap(), HEAP_NO_SERIALIZE, pbData);
@@ -145,7 +145,8 @@ _main(
         DoPutDword(hFile, Size);
         DoPutSz(hFile, "\r\n");
 
-        DoWriteFile(hFile, pbData, 0x7F - 0x20);
+        DoWriteFile(hFile, &pbData[0x20], 0x7F - 0x20);
+        DoPutSz(hFile, "\r\n");
 
         RtlFreeHeap(RtlGetProcessHeap(), 0, pbData);
     }
