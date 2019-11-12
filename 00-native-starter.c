@@ -60,10 +60,12 @@ BOOL CreateNativeProcess(LPCWSTR file_name, LPCWSTR cmd_line)
 
 int main(int argc, char **argv)
 {
+    BOOL ret;
     ANSI_STRING FileNameA;
     UNICODE_STRING FileNameW;
     RtlInitAnsiStringEx(&FileNameA, argv[1]);
     RtlAnsiStringToUnicodeString(&FileNameW, &FileNameA, TRUE);
-
-    return CreateNativeProcess(FileNameW.Buffer, FileNameW.Buffer) ? 0 : -1;
+    ret = CreateNativeProcess(FileNameW.Buffer, FileNameW.Buffer);
+    RtlFreeUnicodeString(&FileNameW);
+    return ret ? 0 : -1;
 }
